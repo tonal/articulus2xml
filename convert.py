@@ -14,7 +14,10 @@ from convert_dir import soran_transform_dir
 # from convert_page import soran_transform_page
 
 
-JORNAL_TMP = Path('JORNAL-TMP')
+JORNAL_TMP = 'JORNAL-TMP'
+
+def validate_tmps(ctx, param, value):
+  pass
 
 
 @click.command()
@@ -34,7 +37,7 @@ JORNAL_TMP = Path('JORNAL-TMP')
 @click.option('--codeNEB', help='codeNEB если он отличается от issn')
 @click.option(
   '--temp-path', default=JORNAL_TMP, show_default=True,
-  type=click.Path(exists=True, dir_okay=True, writable=True, allow_dash=True),
+  type=click.Path(dir_okay=True, writable=True, allow_dash=True),
   help='Путь к каталогу для временных файлов. Для использования системного укажите "-"'
 )
 @click.option(
@@ -126,13 +129,119 @@ def validate_all_xml(relaxng):
 
 
 def create_validator():
-  rng_tree = rnc2rng.load('articles.rnc')
+  # rng_tree = rnc2rng.load('articles.rnc')
+  rng_tree = rnc2rng.loads(ARTICLES_RNC)
   # print(rnc2rng.dumps(rng_tree))
   rng_str = rnc2rng.dumps(rng_tree)
   # print(rng_str[:100])
   rng_doc = etree.parse(BytesIO(rng_str.encode('utf-8')))
   relaxng = etree.RelaxNG(rng_doc)
   return relaxng
+
+
+# language=RELAX-NG
+ARTICLES_RNC = '''
+default namespace = ""
+
+start =
+    element journal {
+        element operCard {
+            element operator { xsd:NCName },
+            element pid { xsd:integer },
+            element date { text },
+            element cntArticle { xsd:integer },
+            element cntNode { empty },
+            element cs { xsd:integer }
+        },
+        element titleid { xsd:integer },
+        element issn { xsd:NMTOKEN },
+        element codeNEB { xsd:integer }?,
+        element journalInfo {
+            attribute lang { xsd:NCName },
+            element title { text }
+        },
+        element issue {
+            element volume { xsd:integer | empty },
+            element number { xsd:integer },
+            element altNumber { empty },
+            element part { empty },
+            element dateUni { text },
+            element issTitle { empty },
+            pages,
+            element articles {
+                (element section {
+                    element secTitle {
+                        attribute lang { xsd:NCName },
+                        text
+                    }+
+                }?,
+                element article {
+                    pages,
+                    element artType { xsd:NCName },
+                    element authors {
+                        element author {
+                            attribute num { xsd:integer },
+                            element individInfo {
+                                attribute lang { xsd:NCName },
+                                element surname { text },
+                                element initials { text },
+                                (element address { text }
+                                 & element email { text }?
+                                 & element orgName { text }?)?
+                            }+
+                        }+
+                    },
+                    element artTitles {
+                        element artTitle {
+                            attribute lang { xsd:NCName },
+                            (text
+                             | element i {text} )+
+                        }+
+                    },
+                    element abstracts {
+                        element abstract {
+                            attribute lang { xsd:NCName },
+                            (text
+                             | element sub { text }
+                             | element sup { text }
+                             | element i {text} )+
+                        }+
+                    },
+                    element text {
+                        attribute lang { xsd:NCName },
+                        text
+                    },
+                    element codes {
+                        element udk { text },
+                        element doi { text }?
+                    },
+                    element keywords {
+                        element kwdGroup {
+                            attribute lang { xsd:NCName },
+                            element keyword { text }+
+                        }
+                    },
+                    element references {
+                        element reference { text }+
+                    },
+                    (element artFunding {
+                          element funding {
+                              attribute lang { xsd:NCName },
+                              text
+                          }
+                    }? &
+                    element dates {
+                            element dateReceived { xsd:NMTOKEN }
+                    }? &
+                    element files {
+                        element file { text }
+                    }? )
+                })+
+            }
+        }
+    }
+pages = element pages { xsd:NMTOKEN }
+'''
 
 
 if __name__ == '__main__':
