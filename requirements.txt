@@ -5,6 +5,7 @@
 #    pip-compile
 #
 appdirs==1.4.3            # via rply
+click==7.0
 fastnumbers==2.2.1        # via natsort
 lxml==4.3.4
 natsort[fast,icu]==6.0.0

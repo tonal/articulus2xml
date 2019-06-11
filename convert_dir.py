@@ -1,36 +1,55 @@
 # -*- codong: utf-8 -*-
 from datetime import datetime
+import logging
 from pathlib import Path
+from tempfile import gettempdir
 
 from lxml import etree
 from natsort import natsort_keygen
 
-JORNAL_TMP = Path('JORNAL-TMP')
 
-def construct_dir_source(dir_name):
+def construct_dir_source(dir_name, tmp_dir):
   # self_path = Path(__file__)
   self_path = Path('.')
   root = etree.Element('files')
   parser = etree.HTMLParser()
-  tmp_dir = JORNAL_TMP
-  for fparh in sorted(Path(dir_name).glob('*.html'), key=natsort_keygen()):
-    tfile = (tmp_dir / fparh.name)
+  if not tmp_dir or tmp_dir == '-':
+    tmp_dir = gettempdir()
+  tmp_dir = Path(tmp_dir)
+  title_exists = False
+  files = tuple(sorted(
+    (f for f in Path(dir_name).glob('*.html') if f.is_file()),
+    key=natsort_keygen()))
+  for fparh in files:
+    tfile:Path = tmp_dir / fparh.name
     with tfile.open('wb') as fout:
       src_root = etree.parse(fparh.as_posix(), parser)
       fout.write(
         etree.tostring(src_root, pretty_print=True, encoding='utf-8'))
-    tag = 'title' if fparh.name.lower() == 'title.html' else 'issue'
-    etree.SubElement(
-      root, tag, path=tfile.as_posix())
+    if fparh.name.lower() == 'title.html':
+      title_exists = True
+      tag = 'title'
+    else:
+      tag = 'issue'
+    file_uri = tfile.as_uri() if tfile.is_absolute() else tfile.as_posix()
+    etree.SubElement(root, tag, path=file_uri)
+  logging.debug(etree.tostring(root, pretty_print=True, encoding='unicode'))
+  if not title_exists:
+    logging.error(
+      'В составе файлов не обнаружили title.html: %s',
+      tuple(f.resolve().as_posix() for f in  files))
+    raise SystemExit(1)
   return root
 
 
-def soran_transform_dir(dir_name, oname):
-  src_root = construct_dir_source(dir_name)
-  print(etree.tostring(src_root, pretty_print=True, encoding='unicode'))
-  # return
+def soran_transform_dir(
+  dir_name, oname:str, out_dir:str, codeNEB:str, temp_path:str
+):
+  src_root = construct_dir_source(dir_name, temp_path)
+
   ns = etree.FunctionNamespace('http://promsoft.ru/soran_transform/dir')
   ns.prefix = 'ps'
+
   journal = JornalParser(ns)
 
   parser = etree.XMLParser(no_network=True)
@@ -43,7 +62,19 @@ def soran_transform_dir(dir_name, oname):
   # src_root = etree.parse(iname, parser)
   # res_trans = transform(src_root, params=etree.XSLT.strparam(openstat))
   res_trans = transform(src_root)
-  open(oname, 'wt', encoding='utf-8').write('%s' % res_trans)
+  if oname == '-':
+    print(res_trans)
+    return
+
+  if not oname:
+    if not codeNEB:
+      codeNEB = journal.codeNEB
+    oname = f'{codeNEB}_{datetime.now().date().isoformat()}_unicode.xml'
+  opath = Path(out_dir) / oname if out_dir else Path(oname)
+  with opath.open('wt', encoding='utf-8') as out:
+    out.write('%s' % res_trans)
+
+  return opath
 
 
 class FileResolver(etree.Resolver):
@@ -54,16 +85,22 @@ class FileResolver(etree.Resolver):
 
 class JornalParser:
 
-  root = None
+  codeNEB:str = None
 
   def __init__(self, ns):
     ns['get_pid'] = self.get_pid
+    ns['get_codeNEB'] = self.get_codeNEB
     ns['ends-with'] = self.ends_with
     ns['now'] = self.now
 
   def get_pid(self, _, e):
     tid = e[0].text.split()[1]
     return tid
+
+  def get_codeNEB(self, _, e):
+    issn = e[0].text.strip()
+    self.codeNEB = codeNEB = ''.join(c for c in issn if c.isdigit())
+    return codeNEB
 
   def ends_with(self, _, s, *args):
     if not s:

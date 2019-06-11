@@ -27,6 +27,7 @@
       </operCard>
       <titleid><xsl:value-of select="$title_doc//p[@id='p000DAT']"/></titleid>
       <issn><xsl:value-of select="$title_doc//p[@id='p001DAT']"/></issn>
+      <codeNEB><xsl:value-of select="ps:get_codeNEB($title_doc//p[@id='p001DAT'])"/></codeNEB>
       <xsl:for-each select="$title_doc//li[@id='n005']/ul/li">
       <journalInfo lang="{substring(@id, 5)}">
         <title><xsl:value-of select="ul/li/div[@class='Content']/p"/></title>
