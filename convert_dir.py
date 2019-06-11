@@ -74,6 +74,8 @@ def soran_transform_dir(
   with opath.open('wt', encoding='utf-8') as out:
     out.write('%s' % res_trans)
 
+  logging.info('Создан файл: %s', opath)
+
   return opath
 
 

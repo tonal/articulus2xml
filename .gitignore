@@ -1,6 +1,8 @@
 *.xml
 *.xsd
-*.rnc
+*.log
+*.zip
+
 /dump
 /IDATA
 /JORNAL-TMP
@@ -14,3 +16,5 @@
 !articles.rnc
 
 __pycache__
+/win32-env
+/convert.build

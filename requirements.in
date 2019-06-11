@@ -2,4 +2,5 @@ click
 lxml
 pyyaml
 rnc2rng
-natsort[fast,icu]
+#natsort[fast,icu]
+natsort[fast]

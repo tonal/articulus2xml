@@ -57,18 +57,12 @@ JORNAL_TMP = Path('JORNAL-TMP')
 @click.option(
   '--debug', 'log_level', flag_value='DEBUG',
   help='Отладочная информация в логе')
+@click.option('--no-console', is_flag=True, help='Отключить вывод в консоль')
 def main(
   validation:bool, input_dir:str, out_name:str, codeneb:str, out_dir:str,
-  temp_path:str, log:str, log_level:str
+  temp_path:str, log:str, log_level:str, no_console:bool
 ):
-  kwds = {}
-  if not log or log == '-':
-    kwds.update(stream=None)
-  else:
-    kwds.update(filename=log)
-  logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(module)-15s:%(lineno)d %(message)s',
-    level=log_level or logging.WARN, **kwds)
+  _init_logging(log, log_level, no_console)
 
   logging.debug('validation: %s', validation)
   logging.debug('input_dir: %s', input_dir)
@@ -81,7 +75,6 @@ def main(
   # soran_transform_page('data.html', 'data.xml')
   out_file = soran_transform_dir(
     input_dir, out_name, out_dir, codeneb, temp_path)
-  logging.debug('Создан файл: %s', out_file)
 
   if validation and out_file:
     relaxng = create_validator()
@@ -89,8 +82,33 @@ def main(
     if not relaxng.validate(out):
       for ell in relaxng.error_log:
         logging.warning(ell)
+        raise SystemExit(2)
     else:
       logging.info('Созданный файл %s валиден', out_file)
+
+
+def _init_logging(log, log_level, no_console):
+  kwds = {}
+  if not log or log == '-':
+    kwds.update(stream=None)
+    to_console = True
+  else:
+    kwds.update(filename=log)
+    to_console = False
+  level = log_level or logging.WARN
+  format = '%(asctime)s %(levelname)-8s %(module)-15s:%(lineno)d %(message)s'
+  logging.basicConfig(
+    format=format,
+    level=level, **kwds)
+  if no_console or to_console:
+    return
+
+  # define a Handler which writes INFO messages or higher to the sys.stderr
+  console = logging.StreamHandler()
+  console.setLevel(level)  # logging.INFO) #DEBUG) #
+  formatter = logging.Formatter(fmt=format)  # , datefmt=datefmt)
+  console.setFormatter(formatter)
+  logging.getLogger('').addHandler(console)
 
 
 def validate_all_xml(relaxng):
