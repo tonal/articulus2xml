@@ -1,0 +1,16 @@
+*.xml
+*.xsd
+*.rnc
+/dump
+/IDATA
+/JORNAL-TMP
+
+/admin-php-load
+
+/.idea
+/venv
+/.python-version
+
+!articles.rnc
+
+__pycache__

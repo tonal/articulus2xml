@@ -1,0 +1,4 @@
+lxml
+pyyaml
+rnc2rng
+natsort[fast,icu]
