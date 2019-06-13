@@ -3,14 +3,16 @@ from datetime import datetime
 import logging
 from pathlib import Path
 from tempfile import gettempdir
+from typing import Optional
 
 from lxml import etree
 from natsort import natsort_keygen
 
 
-def construct_dir_source(dir_name, tmp_dir):
+def construct_dir_source(dir_name:Path, tmp_dir:str, title_name:str):
   # self_path = Path(__file__)
-  self_path = Path('.')
+  # self_path = Path('.')
+  title_name = title_name.lower()
   root = etree.Element('files')
   parser = etree.HTMLParser()
   if not tmp_dir or tmp_dir == '-':
@@ -36,7 +38,7 @@ def construct_dir_source(dir_name, tmp_dir):
       src_root = etree.parse(fparh.as_posix(), parser)
       fout.write(
         etree.tostring(src_root, pretty_print=True, encoding='utf-8'))
-    if fparh.name.lower() == 'title.html':
+    if fparh.name.lower() == title_name:
       title_exists = True
       tag = 'title'
     else:
@@ -53,9 +55,9 @@ def construct_dir_source(dir_name, tmp_dir):
 
 
 def soran_transform_dir(
-  dir_name, oname:str, out_dir:str, codeNEB:str, temp_path:str
-):
-  src_root = construct_dir_source(dir_name, temp_path)
+  dir_name:Path, oname:str, out_dir:str, codeNEB:str, title_name:str, temp_path:str
+) -> Optional[Path]:
+  src_root = construct_dir_source(dir_name, temp_path, title_name)
 
   ns = etree.FunctionNamespace('http://promsoft.ru/soran_transform/dir')
   ns.prefix = 'ps'

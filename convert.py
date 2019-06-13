@@ -14,7 +14,7 @@ from convert_dir import soran_transform_dir
 # from convert_page import soran_transform_page
 
 
-JORNAL_TMP = 'JORNAL-TMP'
+JOURNAL_TMP = 'JOURNAL-TMP'
 
 def validate_tmps(ctx, param, value):
   pass
@@ -36,7 +36,10 @@ def validate_tmps(ctx, param, value):
   help='Путь к каталогу выходного файла [по умолчанию текущий]' )
 @click.option('--codeNEB', help='codeNEB если он отличается от issn')
 @click.option(
-  '--temp-path', default=JORNAL_TMP, show_default=True,
+  '-t', '--title-name', default='title.html', show_default=True,
+  help='Имя файла с общей снформацией о выпуске')
+@click.option(
+  '--temp-path', default=JOURNAL_TMP, show_default=True,
   type=click.Path(dir_okay=True, writable=True, allow_dash=True),
   help='Путь к каталогу для временных файлов. Для использования системного укажите "-"'
 )
@@ -62,8 +65,8 @@ def validate_tmps(ctx, param, value):
   help='Отладочная информация в логе')
 @click.option('--no-console', is_flag=True, help='Отключить вывод в консоль')
 def main(
-  validation:bool, input_dir:str, out_name:str, codeneb:str, out_dir:str,
-  temp_path:str, log:str, log_level:str, no_console:bool
+  validation:bool, input_dir:str, out_name:str, codeneb:str, title_name:str,
+  out_dir:str, temp_path:str, log:str, log_level:str, no_console:bool
 ):
   _init_logging(log, log_level, no_console)
 
@@ -71,13 +74,14 @@ def main(
   logging.debug('input_dir: %s', input_dir)
   logging.debug('out_file: %s', out_name)
   logging.debug('codeNEB: %s', codeneb)
+  logging.debug('title_name: %s', title_name)
   logging.debug('out_dir: %s', out_dir)
   logging.debug('temp_path: %s:', temp_path)
   # return
 
   # soran_transform_page('data.html', 'data.xml')
   out_file = soran_transform_dir(
-    input_dir, out_name, out_dir, codeneb, temp_path)
+    Path(input_dir), out_name, out_dir, codeneb, title_name, temp_path)
 
   if validation and out_file:
     relaxng = create_validator()
@@ -108,7 +112,7 @@ def _init_logging(log, log_level, no_console):
 
   # define a Handler which writes INFO messages or higher to the sys.stderr
   console = logging.StreamHandler()
-  console.setLevel(level)  # logging.INFO) #DEBUG) #
+  console.setLevel(level) # if level not in {'INFO', 'DEBUG'} else 'INFO')  # logging.INFO) #DEBUG) #
   formatter = logging.Formatter(fmt=format)  # , datefmt=datefmt)
   console.setFormatter(formatter)
   logging.getLogger('').addHandler(console)
