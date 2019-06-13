@@ -20,9 +20,11 @@ Options:
   --out-dir PATH                  Путь к каталогу выходного файла [по
                                   умолчанию текущий]
   --codeNEB TEXT                  codeNEB если он отличается от issn
+  -t, --title-name TEXT           Имя файла с общей снформацией о выпуске
+                                  [default: title.html]
   --temp-path PATH                Путь к каталогу для временных файлов. Для
                                   использования системного укажите "-"
-                                  [default: JORNAL-TMP]
+                                  [default: JOURNAL-TMP]
   --validation / --no-validation  Проверка сгенерированного XML-я  [default:
                                   True]
   -l, --log PATH                  Имя лог-файла. Для вывода в стандартный
@@ -34,5 +36,10 @@ Options:
   --debug                         Отладочная информация в логе
   --no-console                    Отключить вывод в консоль
   --help                          Show this message and exit.
+```
 
+Компилируем для win32:
+```
+> set CC=C:\lang\mingw64\8.1.0-dwarf-win32\bin\gcc.exe
+> nuitka --standalone --follow-imports --show-progress --show-scons convert.py
 ```
