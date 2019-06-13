@@ -154,23 +154,15 @@ XSLT = '''<?xml version="1.0"?>
         <cntNode/>
         <cs>0</cs>
       </operCard>
-      <titleid><xsl:value-of select="$title_doc//p[@id='p000DAT']"/></titleid>
-      <issn><xsl:value-of select="$title_doc//p[@id='p001DAT']"/></issn>
-      <codeNEB><xsl:value-of select="ps:get_codeNEB($title_doc//p[@id='p001DAT'])"/></codeNEB>
-      <xsl:for-each select="$title_doc//li[@id='n005']/ul/li">
-      <journalInfo lang="{substring(@id, 5)}">
-        <title><xsl:value-of select="ul/li/div[@class='Content']/p"/></title>
-      </journalInfo>
-      </xsl:for-each>
+      <xsl:call-template name="title_jour" >
+        <xsl:with-param name="title" select="$title_doc"/>
+      </xsl:call-template>
       <issue>
-        <volume><xsl:value-of select="$title_doc//p[@id='p006DAT']"/></volume>
-        <number><xsl:value-of select="$title_doc//p[@id='p007DAT']"/></number>
-        <altNumber/>
-        <part/>
-        <dateUni><xsl:value-of select="$title_doc//p[@id='p013DAT']"/></dateUni>
-        <issTitle/>
-        <pages><xsl:value-of select="$title_doc//p[@id='p031DAT']"/></pages>
-        <articles><xsl:for-each select="$files//div[@id='left']/ul[@class='Container']/li">
+        <xsl:call-template name="title_issue" >
+          <xsl:with-param name="title" select="$title_doc"/>
+        </xsl:call-template>
+        <articles>
+        <xsl:for-each select="$files//div[@id='left']/ul[@class='Container']/li">
           <article>
             <pages><xsl:value-of
              select="ul[@class='Container']/li[div/a/text() = 'Страницы']/ul/li/div[@class='Content']/p[@id]"/></pages>
@@ -236,21 +228,44 @@ XSLT = '''<?xml version="1.0"?>
             </xsl:for-each></artFunding>
             </xsl:if>
             <dates><xsl:for-each select="ul[@class='Container']/li[div/a/text() = 'Даты']/ul[@class='Container']/li">
-              <dateReceived><xsl:value-of
-                select="ul/li/div/p"/></dateReceived>
+              <dateReceived><xsl:value-of select="ul/li/div/p"/></dateReceived>
             </xsl:for-each></dates>
-          </article>
-        </xsl:for-each></articles>
+          </article >
+        </xsl:for-each>
+        </articles>
       </issue>
 
     </journal>
   </xsl:template>
 
-  <xsl:template match="node() | @*" name="copy_all">
+  <!--xsl:template match="node() | @*" name="copy_all">
       <xsl:copy>
           <xsl:apply-templates select="node() | @*" />
       </xsl:copy>
+  </xsl:template -->
+  
+  <xsl:template name="title_jour" mode="title">
+    <xsl:param name="title"/>
+    <titleid><xsl:value-of select="$title//p[@id='p000DAT']"/></titleid>
+    <issn><xsl:value-of select="$title//p[@id='p001DAT']"/></issn>
+    <codeNEB><xsl:value-of select="ps:get_codeNEB($title//p[@id='p001DAT'])"/></codeNEB>
+    <xsl:for-each select="$title//li[@id='n005']/ul/li">
+    <journalInfo lang="{substring(@id, 5)}">
+      <title><xsl:value-of select="ul/li/div[@class='Content']/p"/></title>
+    </journalInfo>
+    </xsl:for-each>
   </xsl:template>
 
+  <xsl:template name="title_issue" mode="title">
+    <xsl:param name="title"/>
+    <volume><xsl:value-of select="$title//p[@id='p006DAT']"/></volume>
+    <number><xsl:value-of select="$title//p[@id='p007DAT']"/></number>
+    <altNumber/>
+    <part/>
+    <dateUni><xsl:value-of select="$title//p[@id='p031DAT']"/></dateUni>
+    <issTitle/>
+    <pages><xsl:value-of select="$title//p[@id='p013DAT']"/></pages>
+  </xsl:template>
+  
 </xsl:stylesheet>
 '''
