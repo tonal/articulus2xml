@@ -7,6 +7,7 @@ from typing import Optional
 
 from lxml import etree
 from natsort import natsort_keygen
+import natsort as ns
 
 
 def construct_dir_source(dir_name:Path, tmp_dir:str, title_name:str):
@@ -31,7 +32,7 @@ def construct_dir_source(dir_name:Path, tmp_dir:str, title_name:str):
   title_exists = False
   files = tuple(sorted(
     (f for f in Path(dir_name).glob('*.html') if f.is_file()),
-    key=natsort_keygen()))
+    key=natsort_keygen(alg=ns.PATH)))
   for fparh in files:
     tfile:Path = tmp_dir / fparh.name
     with tfile.open('wb') as fout:
@@ -245,7 +246,7 @@ XSLT = '''<?xml version="1.0"?>
           <xsl:apply-templates select="node() | @*" />
       </xsl:copy>
   </xsl:template -->
-  
+
   <xsl:template name="title_jour" mode="title">
     <xsl:param name="title"/>
     <titleid><xsl:value-of select="$title//p[@id='p000DAT']"/></titleid>
@@ -268,6 +269,6 @@ XSLT = '''<?xml version="1.0"?>
     <issTitle/>
     <pages><xsl:value-of select="$title//p[@id='p013DAT']"/></pages>
   </xsl:template>
-  
+
 </xsl:stylesheet>
 '''
