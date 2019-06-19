@@ -36,8 +36,8 @@ def validate_tmps(ctx, param, value):
   help='Путь к каталогу выходного файла [по умолчанию текущий]' )
 @click.option('--codeNEB', help='codeNEB если он отличается от issn')
 @click.option(
-  '-t', '--title-name', default='title.html', show_default=True,
-  help='Имя файла с общей снформацией о выпуске')
+  '-t', '--title-name', default='title', show_default=True,
+  help='Имя файла с общей снформацией о выпуске без расширения')
 @click.option(
   '--temp-path', default=JOURNAL_TMP, show_default=True,
   type=click.Path(dir_okay=True, writable=True, allow_dash=True),
@@ -189,9 +189,9 @@ start =
                                 attribute lang { xsd:NCName },
                                 element surname { text },
                                 element initials { text },
-                                (element address { text }
+                                (element address { text }?
                                  & element email { text }?
-                                 & element orgName { text }?)?
+                                 & element orgName { text }?)
                             }+
                         }+
                     },

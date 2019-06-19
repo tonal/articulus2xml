@@ -42,9 +42,9 @@ start =
                                 attribute lang { xsd:NCName },
                                 element surname { text },
                                 element initials { text },
-                                (element address { text }
+                                (element address { text }?
                                  & element email { text }?
-                                 & element orgName { text }?)?
+                                 & element orgName { text }?)
                             }+
                         }+
                     },

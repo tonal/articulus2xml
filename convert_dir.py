@@ -13,7 +13,7 @@ import natsort as ns
 def construct_dir_source(dir_name:Path, tmp_dir:str, title_name:str):
   # self_path = Path(__file__)
   # self_path = Path('.')
-  title_name = title_name.lower()
+  title_name = title_name.lower().strip() + '.'
   root = etree.Element('files')
   parser = etree.HTMLParser()
   if not tmp_dir or tmp_dir == '-':
@@ -31,7 +31,7 @@ def construct_dir_source(dir_name:Path, tmp_dir:str, title_name:str):
     tmp_dir = Path(tmp_dir)
   title_exists = False
   files = tuple(sorted(
-    (f for f in Path(dir_name).glob('*.html') if f.is_file()),
+    (f for g in ('*.html', '*.htm') for f in Path(dir_name).glob(g) if f.is_file()),
     key=natsort_keygen(alg=ns.PATH)))
   for fparh in files:
     tfile:Path = tmp_dir / fparh.name
@@ -39,7 +39,7 @@ def construct_dir_source(dir_name:Path, tmp_dir:str, title_name:str):
       src_root = etree.parse(fparh.as_posix(), parser)
       fout.write(
         etree.tostring(src_root, pretty_print=True, encoding='utf-8'))
-    if fparh.name.lower() == title_name:
+    if fparh.name.lower().startswith(title_name):
       title_exists = True
       tag = 'title'
     else:
@@ -230,9 +230,11 @@ XSLT = '''<?xml version="1.0"?>
               <funding lang="{substring(@id, 5)}"><xsl:value-of select="ul[@class='Container']/li/div/p"/></funding>
             </xsl:for-each></artFunding>
             </xsl:if>
+            <xsl:if test="ul[@class='Container']/li[div/a/text() = 'Даты']">
             <dates><xsl:for-each select="ul[@class='Container']/li[div/a/text() = 'Даты']/ul[@class='Container']/li">
               <dateReceived><xsl:value-of select="ul/li/div/p"/></dateReceived>
             </xsl:for-each></dates>
+            </xsl:if>
           </article >
         </xsl:for-each>
         </articles>

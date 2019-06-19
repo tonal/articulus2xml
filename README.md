@@ -20,8 +20,8 @@ Options:
   --out-dir PATH                  Путь к каталогу выходного файла [по
                                   умолчанию текущий]
   --codeNEB TEXT                  codeNEB если он отличается от issn
-  -t, --title-name TEXT           Имя файла с общей снформацией о выпуске
-                                  [default: title.html]
+  -t, --title-name TEXT           Имя файла с общей снформацией о выпуске без
+                                  расширения  [default: title]
   --temp-path PATH                Путь к каталогу для временных файлов. Для
                                   использования системного укажите "-"
                                   [default: JOURNAL-TMP]
