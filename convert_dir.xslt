@@ -98,9 +98,11 @@
               <funding lang="{substring(@id, 5)}"><xsl:value-of select="ul[@class='Container']/li/div/p"/></funding>
             </xsl:for-each></artFunding>
             </xsl:if>
+            <xsl:if test="ul[@class='Container']/li[div/a/text() = 'Даты']">
             <dates><xsl:for-each select="ul[@class='Container']/li[div/a/text() = 'Даты']/ul[@class='Container']/li">
               <dateReceived><xsl:value-of select="ul/li/div/p"/></dateReceived>
             </xsl:for-each></dates>
+            </xsl:if>
           </article >
         </xsl:for-each>
         </articles>
