@@ -4,11 +4,19 @@
 #
 #    pip-compile
 #
-appdirs==1.4.3            # via rply
+appdirs==1.4.3
+    # via rply
 click==7.0
-fastnumbers==2.2.1        # via natsort
-lxml==4.3.4
+    # via -r requirements.in
+fastnumbers==2.2.1
+    # via natsort
+lxml==4.6.5
+    # via -r requirements.in
 natsort[fast]==6.0.0
+    # via -r requirements.in
 pyyaml==5.1.1
+    # via -r requirements.in
 rnc2rng==2.6.1
-rply==0.7.7               # via rnc2rng
+    # via -r requirements.in
+rply==0.7.7
+    # via rnc2rng
